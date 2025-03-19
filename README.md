@@ -1,4 +1,3 @@
-```markdown
 # ROM Organizer Script
 
 This script is designed to automatically organize a collection of SNES ROMs into folders based on their genre. It uses the IGDB API to fetch game information and categorize the ROMs. Additionally, it allows you to generate a local database in CSV format and move the ROM files to their corresponding folders.
@@ -141,5 +140,4 @@ D:\ROMS\
 If you encounter any issues or have questions, feel free to open an issue in the repository or contact me directly.
 
 I hope this script helps you organize your ROM collection! 😊
-```
 
