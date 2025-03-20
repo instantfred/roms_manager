@@ -184,7 +184,38 @@ def move_roms():
         else:
             print(f"File not found: {filename}")
 
-            
+# Function to reorganize ROMs based on the CSV
+def reorganize_roms():
+    if not os.path.exists(csv_path):
+        print("CSV database not found. Please generate it first.")
+        return
+
+    # Read the CSV file
+    with open(csv_path, mode='r', encoding='utf-8') as file:
+        reader = csv.reader(file)
+        next(reader)  # Skip the header row
+        rows = list(reader)
+
+    # Create genre folders if they don't exist
+    genres = set(row[1] for row in rows)  # Get all unique genres from the CSV
+    for genre in genres:
+        genre_folder = os.path.join(roms_path, genre)
+        os.makedirs(genre_folder, exist_ok=True)  # Create folder if it doesn't exist
+
+    # Reorganize files with a progress bar
+    for row in tqdm(rows, desc="Reorganizing ROMs", unit="ROM"):
+        filename, genre = row
+        # Search for the file in all subfolders
+        for root, _, files in os.walk(roms_path):
+            if filename in files:
+                current_path = os.path.join(root, filename)
+                destination_path = os.path.join(roms_path, genre, filename)
+                
+                # Move the file if it's not already in the correct folder
+                if root != os.path.join(roms_path, genre):
+                    shutil.move(current_path, destination_path)
+                break
+
 # Main script
 if __name__ == "__main__":
     # Prompt user for ROMs path
@@ -196,11 +227,12 @@ if __name__ == "__main__":
     # Main menu
     print("1. Generate CSV database")
     print("2. Move ROMs based on CSV")
-    option = input("Select an option (1 or 2): ")
+    print("3. Reorganize ROMs based on CSV")
+    option = input("Select an option (1, 2, or 3): ")
 
     if option == "1":
-        # Ask the user if they want to apply custom genre mapping
-        use_human_readable = input("Do you want to apply custom genre mapping? (yes/no): ").strip().lower()
+        # Ask the user if they want to apply human-readable genre mapping
+        use_human_readable = input("Do you want to apply human-readable genre mapping? (yes/no): ").strip().lower()
         use_human_readable = use_human_readable == "yes"
 
         # Prompt user for credentials (only needed for CSV generation)
@@ -225,5 +257,9 @@ if __name__ == "__main__":
         # Move ROMs based on the existing CSV
         move_roms()
         print("ROMs moved successfully.")
+    elif option == "3":
+        # Reorganize ROMs based on the existing CSV
+        reorganize_roms()
+        print("ROMs reorganized successfully.")
     else:
         print("Invalid option.")
