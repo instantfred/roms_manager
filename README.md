@@ -163,4 +163,4 @@ D:\ROMS\
 
 If you encounter any issues or have questions, feel free to open an issue or contact me directly.
 
-Enjoy organizing your ROM collection! 😊OM Organizer Script
+Enjoy organizing your ROM collection! 😊
