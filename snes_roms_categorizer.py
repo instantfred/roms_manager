@@ -5,9 +5,8 @@ import json
 import requests
 from igdb.wrapper import IGDBWrapper
 import shutil
-from tqdm import tqdm  # For progress bars
+from tqdm import tqdm
 
-# Function to get the access token from Twitch
 def get_access_token(client_id, client_secret):
     url = "https://id.twitch.tv/oauth2/token"
     params = {
@@ -21,7 +20,6 @@ def get_access_token(client_id, client_secret):
     else:
         raise Exception(f"Failed to get access token: {response.status_code} - {response.text}")
 
-# Function to map IGDB genre names to custom terms
 def map_genre_to_custom(genre_name):
     genre_mapping = {
         "Hack and slash/Beat 'em up": "Action",
@@ -109,23 +107,18 @@ def map_genre_to_custom(genre_name):
     }
     return genre_mapping.get(genre_name, "Others")
 
-# Function to fetch the genre of a game from IGDB
 def fetch_genre(game_name, use_custom):
     try:
-        # Search for the game on IGDB
         byte_array = wrapper.api_request(
             'games',
             f'search "{game_name}"; fields name, genres.name; limit 1;'
         )
-        # Decode the byte array and parse the JSON response
         data = json.loads(byte_array.decode('utf-8'))
         
-        # Extract the genre (if found)
         if data and isinstance(data, list) and len(data) > 0:
             genres = data[0].get("genres", [])
             if genres:
                 genre_name = genres[0].get("name", "Others")
-                # Apply custom mapping if enabled
                 if use_custom:
                     genre_name = map_genre_to_custom(genre_name)
                 return genre_name
@@ -134,46 +127,34 @@ def fetch_genre(game_name, use_custom):
         print(f"Error fetching {game_name}: {e}")
         return "Others"
 
-# Function to generate the CSV database
 def generate_csv(use_custom):
-    # Get a list of all ROM files
     rom_files = [f for f in os.listdir(roms_path) if f.endswith(".smc") or f.endswith(".sfc")]
-    total_roms = len(rom_files)
 
     with open(csv_path, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
-        writer.writerow(["ROM Name", "Genre"])  # CSV headers
+        writer.writerow(["ROM Name", "Genre"])
 
-        # Iterate through all files in the ROMs folder with a progress bar
         for filename in tqdm(rom_files, desc="Generating CSV", unit="ROM"):
-            game_name = os.path.splitext(filename)[0]  # Remove file extension
+            game_name = os.path.splitext(filename)[0]
             genre = fetch_genre(game_name, use_custom)
-            
-            # Write the information to the CSV
             writer.writerow([filename, genre])
-            
-            # Wait 0.25 seconds to comply with the API limit (4 requests per second)
             time.sleep(0.25)
 
-# Function to move ROMs based on the CSV
 def move_roms():
     if not os.path.exists(csv_path):
         print("CSV database not found. Please generate it first.")
         return
 
-    # Read the CSV file
     with open(csv_path, mode='r', encoding='utf-8') as file:
         reader = csv.reader(file)
-        next(reader)  # Skip the header row
+        next(reader)
         rows = list(reader)
 
-    # Create genre folders if they don't exist
-    genres = set(row[1] for row in rows)  # Get all unique genres from the CSV
+    genres = set(row[1] for row in rows)
     for genre in genres:
         genre_folder = os.path.join(roms_path, genre)
-        os.makedirs(genre_folder, exist_ok=True)  # Create folder if it doesn't exist
+        os.makedirs(genre_folder, exist_ok=True)
 
-    # Move files with a progress bar
     for row in tqdm(rows, desc="Moving ROMs", unit="ROM"):
         filename, genre = row
         current_path = os.path.join(roms_path, filename)
@@ -184,49 +165,37 @@ def move_roms():
         else:
             print(f"File not found: {filename}")
 
-# Function to reorganize ROMs based on the CSV
 def reorganize_roms():
     if not os.path.exists(csv_path):
         print("CSV database not found. Please generate it first.")
         return
 
-    # Read the CSV file
     with open(csv_path, mode='r', encoding='utf-8') as file:
         reader = csv.reader(file)
-        next(reader)  # Skip the header row
+        next(reader)
         rows = list(reader)
 
-    # Create genre folders if they don't exist
-    genres = set(row[1] for row in rows)  # Get all unique genres from the CSV
+    genres = set(row[1] for row in rows)
     for genre in genres:
         genre_folder = os.path.join(roms_path, genre)
-        os.makedirs(genre_folder, exist_ok=True)  # Create folder if it doesn't exist
+        os.makedirs(genre_folder, exist_ok=True)
 
-    # Reorganize files with a progress bar
     for row in tqdm(rows, desc="Reorganizing ROMs", unit="ROM"):
         filename, genre = row
-        # Search for the file in all subfolders
         for root, _, files in os.walk(roms_path):
             if filename in files:
                 current_path = os.path.join(root, filename)
                 destination_path = os.path.join(roms_path, genre, filename)
                 
-                # Move the file if it's not already in the correct folder
                 if root != os.path.join(roms_path, genre):
                     shutil.move(current_path, destination_path)
                 break
 
-# Main script
 if __name__ == "__main__":
-    # Prompt user for ROMs path
     roms_path = input("Enter the full path to your ROMs folder: ").strip()
-
-    # Path to the local CSV database
     csv_path = os.path.join(roms_path, "roms_database.csv")
 
-    # Main loop
     while True:
-        # Main menu
         print("\n1. Generate CSV database")
         print("2. Move ROMs based on CSV")
         print("3. Reorganize ROMs based on CSV")
@@ -234,15 +203,12 @@ if __name__ == "__main__":
         option = input("Select an option (1, 2, 3, or Q): ").strip().lower()
 
         if option == "1":
-            # Ask the user if they want to apply custom genre mapping
             use_custom = input("Do you want to apply custom genre mapping? (yes/no): ").strip().lower()
             use_custom = use_custom == "yes"
 
-            # Prompt user for credentials (only needed for CSV generation)
             client_id = input("Enter your IGDB Client ID: ").strip()
             client_secret = input("Enter your IGDB Client Secret: ").strip()
 
-            # Get the access token
             try:
                 access_token = get_access_token(client_id, client_secret)
                 print("Successfully authenticated with Twitch.")
@@ -250,22 +216,16 @@ if __name__ == "__main__":
                 print(e)
                 continue
 
-            # Configure IGDB API with the access token
             wrapper = IGDBWrapper(client_id, access_token)
-
-            # Generate the CSV
             generate_csv(use_custom)
             print("CSV database generated successfully.")
         elif option == "2":
-            # Move ROMs based on the existing CSV
             move_roms()
             print("ROMs moved successfully.")
         elif option == "3":
-            # Reorganize ROMs based on the existing CSV
             reorganize_roms()
             print("ROMs reorganized successfully.")
         elif option in ["q", "quit", "exit"]:
-            # Exit the program
             print("Goodbye!")
             break
         else:
