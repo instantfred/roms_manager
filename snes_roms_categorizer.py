@@ -22,7 +22,7 @@ def get_access_token(client_id, client_secret):
         raise Exception(f"Failed to get access token: {response.status_code} - {response.text}")
 
 # Function to map IGDB genre names to custom terms
-def map_genre_to_human_readable(genre_name):
+def map_genre_to_custom(genre_name):
     genre_mapping = {
         "Hack and slash/Beat 'em up": "Action",
         "Platform": "Platformer",
@@ -110,7 +110,7 @@ def map_genre_to_human_readable(genre_name):
     return genre_mapping.get(genre_name, "Others")
 
 # Function to fetch the genre of a game from IGDB
-def fetch_genre(game_name, use_human_readable):
+def fetch_genre(game_name, use_custom):
     try:
         # Search for the game on IGDB
         byte_array = wrapper.api_request(
@@ -126,8 +126,8 @@ def fetch_genre(game_name, use_human_readable):
             if genres:
                 genre_name = genres[0].get("name", "Others")
                 # Apply custom mapping if enabled
-                if use_human_readable:
-                    genre_name = map_genre_to_human_readable(genre_name)
+                if use_custom:
+                    genre_name = map_genre_to_custom(genre_name)
                 return genre_name
         return "Others"
     except Exception as e:
@@ -135,7 +135,7 @@ def fetch_genre(game_name, use_human_readable):
         return "Others"
 
 # Function to generate the CSV database
-def generate_csv(use_human_readable):
+def generate_csv(use_custom):
     # Get a list of all ROM files
     rom_files = [f for f in os.listdir(roms_path) if f.endswith(".smc") or f.endswith(".sfc")]
     total_roms = len(rom_files)
@@ -147,7 +147,7 @@ def generate_csv(use_human_readable):
         # Iterate through all files in the ROMs folder with a progress bar
         for filename in tqdm(rom_files, desc="Generating CSV", unit="ROM"):
             game_name = os.path.splitext(filename)[0]  # Remove file extension
-            genre = fetch_genre(game_name, use_human_readable)
+            genre = fetch_genre(game_name, use_custom)
             
             # Write the information to the CSV
             writer.writerow([filename, genre])
@@ -224,42 +224,49 @@ if __name__ == "__main__":
     # Path to the local CSV database
     csv_path = os.path.join(roms_path, "roms_database.csv")
 
-    # Main menu
-    print("1. Generate CSV database")
-    print("2. Move ROMs based on CSV")
-    print("3. Reorganize ROMs based on CSV")
-    option = input("Select an option (1, 2, or 3): ")
+    # Main loop
+    while True:
+        # Main menu
+        print("\n1. Generate CSV database")
+        print("2. Move ROMs based on CSV")
+        print("3. Reorganize ROMs based on CSV")
+        print("Q. Quit")
+        option = input("Select an option (1, 2, 3, or Q): ").strip().lower()
 
-    if option == "1":
-        # Ask the user if they want to apply human-readable genre mapping
-        use_human_readable = input("Do you want to apply human-readable genre mapping? (yes/no): ").strip().lower()
-        use_human_readable = use_human_readable == "yes"
+        if option == "1":
+            # Ask the user if they want to apply custom genre mapping
+            use_custom = input("Do you want to apply custom genre mapping? (yes/no): ").strip().lower()
+            use_custom = use_custom == "yes"
 
-        # Prompt user for credentials (only needed for CSV generation)
-        client_id = input("Enter your IGDB Client ID: ").strip()
-        client_secret = input("Enter your IGDB Client Secret: ").strip()
+            # Prompt user for credentials (only needed for CSV generation)
+            client_id = input("Enter your IGDB Client ID: ").strip()
+            client_secret = input("Enter your IGDB Client Secret: ").strip()
 
-        # Get the access token
-        try:
-            access_token = get_access_token(client_id, client_secret)
-            print("Successfully authenticated with Twitch.")
-        except Exception as e:
-            print(e)
-            exit()
+            # Get the access token
+            try:
+                access_token = get_access_token(client_id, client_secret)
+                print("Successfully authenticated with Twitch.")
+            except Exception as e:
+                print(e)
+                continue
 
-        # Configure IGDB API with the access token
-        wrapper = IGDBWrapper(client_id, access_token)
+            # Configure IGDB API with the access token
+            wrapper = IGDBWrapper(client_id, access_token)
 
-        # Generate the CSV
-        generate_csv(use_human_readable)
-        print("CSV database generated successfully.")
-    elif option == "2":
-        # Move ROMs based on the existing CSV
-        move_roms()
-        print("ROMs moved successfully.")
-    elif option == "3":
-        # Reorganize ROMs based on the existing CSV
-        reorganize_roms()
-        print("ROMs reorganized successfully.")
-    else:
-        print("Invalid option.")
+            # Generate the CSV
+            generate_csv(use_custom)
+            print("CSV database generated successfully.")
+        elif option == "2":
+            # Move ROMs based on the existing CSV
+            move_roms()
+            print("ROMs moved successfully.")
+        elif option == "3":
+            # Reorganize ROMs based on the existing CSV
+            reorganize_roms()
+            print("ROMs reorganized successfully.")
+        elif option in ["q", "quit", "exit"]:
+            # Exit the program
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid option. Please try again.")
