@@ -1,101 +1,104 @@
 # ROM Organizer Script
 
-This script is designed to automatically organize a collection of SNES ROMs into folders based on their genre. It uses the IGDB API to fetch game information and categorize the ROMs. Additionally, it allows you to generate a local database in CSV format and move the ROM files to their corresponding folders.
+This script is designed to help you organize your SNES ROM collection by categorizing them into folders based on genre, publisher, or alphabetical order. It uses the IGDB API to fetch game information and allows you to customize genre mappings. Additionally, it includes a cleanup feature to remove empty folders after reorganization.
+
+## Features
+
+### Generate CSV Database
+- Fetches game information (genre, publisher) from the IGDB API.
+- Creates a `roms_database.csv` file in your ROMs folder.
+
+### Reorganize ROMs
+- Moves ROMs into folders based on:
+     - **Genre**
+     - **Publisher**
+     - **Alphabetical order** (first letter of the ROM name).
+
+### Clean Up Empty Folders
+- Deletes all empty folders in the ROMs directory after reorganization.
+
+### Colored Console Output
+- Uses colored text for better readability:
+     - **Success messages**: Green
+     - **Error messages**: Red
+     - **Prompts**: Cyan
+     - **Menu options**: Yellow
+
+### Custom Genre Mapping
+- Allows you to map IGDB genre names to custom, user-friendly names.
 
 ## Requirements
 
-- **Python 3.8 or higher**: Make sure you have Python installed. You can download it from [python.org](https://www.python.org/).
-- **Python Libraries**: The script uses the following libraries:
-    - `requests`
-    - `tqdm`
-    - `igdb-api-v4`
-
-    You can install them by running:
-    ```bash
-    pip install requests tqdm igdb-api-v4
-    ```
-
-- **IGDB Credentials**:
-    - You will need a Client ID and a Client Secret from IGDB. Sign up at [IGDB API](https://api-docs.igdb.com/) to get them.
-
-## Setup
-
-1. **Clone or download the script**:
-     - Download the `snes_roms_organizer.py` script and place it in a folder of your choice.
-
-2. **Prepare your ROM collection**:
-     - Place all your ROM files (`.smc` or `.sfc`) in a folder. For example:
-         ```
-         D:\ROMS\
-         ```
+- **Python 3.8 or higher**: Download from [python.org](https://www.python.org/).
+- **Python Libraries**:
+     - `requests`
+     - `tqdm`
+     - `colorama`
+     - `igdb-api-v4`
+- Install them using:
+     ```bash
+     pip install requests tqdm colorama igdb-api-v4
+     ```
+- **IGDB API Credentials**:
+     - Register at [IGDB API](https://api-docs.igdb.com/) to get a Client ID and Client Secret.
 
 ## Usage
 
 ### Step 1: Run the Script
-
-Open a terminal or command prompt and navigate to the folder where you saved the script. Then, run:
+Open a terminal or command prompt and navigate to the folder where the script is located. Run the script using:
 ```bash
-python snes_roms_organizer.py
+python snes_rom_organizer.py
 ```
 
-### Step 2: Select an Option
-
-The script will display a menu with two options:
+### Step 2: Enter the ROMs Path
+The script will prompt you to enter the full path to your ROMs folder. For example:
 ```
-1. Generate CSV database
-2. Move ROMs based on CSV
-Select an option (1 or 2):
-```
-
-#### Option 1: Generate the CSV Database
-
-1. Enter the path to your ROMs folder:
-     ```
-     Enter the full path to your ROMs folder: D:\ROMS\
-     ```
-
-2. Choose whether to apply a custom genre mapping:
-     ```
-     Do you want to apply a custom genre mapping? (yes/no): yes
-     ```
-     What this means, is that we are going to map the games into the categories defined by the variable `map_genre_to_human_readable`. You can always update that to your desire or omit it to use IGDB's categories.
-
-3. Enter your IGDB credentials:
-     ```
-     Enter your IGDB Client ID: your_client_id
-     Enter your IGDB Client Secret: your_client_secret
-     ```
-
-4. Wait for the CSV to be generated:
-     - The script will query the IGDB API for each ROM and generate a `roms_database.csv` file in the ROMs folder. You will see a progress bar:
-         ```
-         Generating CSV: 100%|████████████████████| 50/50 [00:12<00:00,  4.00ROM/s]
-         CSV database generated successfully.
-         ```
-
-#### Option 2: Move ROMs Based on the CSV
-
-1. Enter the path to your ROMs folder:
-     ```
-     Enter the full path to your ROMs folder: D:\ROMS\
-     ```
-
-2. Wait for the ROMs to be moved:
-     - The script will read the `roms_database.csv` file and move the ROMs to their corresponding genre folders. You will see a progress bar:
-         ```
-         Moving ROMs: 100%|████████████████████| 50/50 [00:03<00:00, 500.00ROM/s]
-         ROMs moved successfully.
-         ```
-
-## Usage Examples
-
-### Example 1: Generate the CSV
-```plaintext
 Enter the full path to your ROMs folder: D:\ROMS\
+```
+
+### Step 3: Select an Option
+The script will display a menu with the following options:
+```
 1. Generate CSV database
-2. Move ROMs based on CSV
-Select an option (1 or 2): 1
-Do you want to apply human-readable genre mapping? (yes/no): yes
+2. Organize by Genre
+3. Organize by Publisher
+4. Organize by Alphabet
+5. Clean up empty folders
+Q. Quit
+Select an option (1-5, or Q/q/quit/exit):
+```
+
+#### Option 1: Generate CSV Database
+- Enter IGDB Credentials (if not already authenticated):
+     ```
+     Enter your IGDB Client ID: abcdefg12345
+     Enter your IGDB Client Secret: hijklmn67890
+     Successfully authenticated with Twitch.
+     ```
+- Apply Custom Genre Mapping (optional):
+     ```
+     Do you want to apply custom genre mapping? (yes/no): yes
+     ```
+- Wait for CSV Generation:
+     The script will fetch game information and create a `roms_database.csv` file in your ROMs folder.
+
+#### Option 2-4: Reorganize ROMs
+- **Organize by Genre**: Moves ROMs into folders named after their genre.
+- **Organize by Publisher**: Moves ROMs into folders named after their publisher.
+- **Organize by Alphabet**: Moves ROMs into folders named after the first letter of the ROM name.
+
+#### Option 5: Clean Up Empty Folders
+- Deletes all empty folders in the ROMs directory. Useful after reorganizing ROMs.
+
+#### Option Q: Quit
+- Exits the script.
+
+## Example Workflow
+
+### Generate CSV:
+```
+Select an option (1-5, or Q/q/quit/exit): 1
+Do you want to apply custom genre mapping? (yes/no): yes
 Enter your IGDB Client ID: abcdefg12345
 Enter your IGDB Client Secret: hijklmn67890
 Successfully authenticated with Twitch.
@@ -103,41 +106,61 @@ Generating CSV: 100%|███████████████████�
 CSV database generated successfully.
 ```
 
-### Example 2: Move the ROMs
-```plaintext
-Enter the full path to your ROMs folder: D:\ROMS\
-1. Generate CSV database
-2. Move ROMs based on CSV
-Select an option (1 or 2): 2
-Moving ROMs: 100%|████████████████████| 50/50 [00:03<00:00, 500.00ROM/s]
-ROMs moved successfully.
+### Reorganize ROMs by Publisher:
+```
+Select an option (1-5, or Q/q/quit/exit): 3
+Reorganizing by publisher: 100%|████████████████████| 50/50 [00:03<00:00, 500.00ROM/s]
+ROMs reorganized successfully.
 ```
 
-## Folder Structure
+### Clean Up Empty Folders:
+```
+Select an option (1-5, or Q/q/quit/exit): 5
+Cleaning up empty folders...
+Deleted empty folder: D:\ROMS\OldFolder
+Deleted 1 empty folders.
+```
 
-After moving the ROMs, the folder structure will look like this:
+### Quit:
+```
+Select an option (1-5, or Q/q/quit/exit): q
+Goodbye!
+```
+
+## Folder Structure Examples
+
+### By Publisher:
 ```
 D:\ROMS\
-├── Action
-│   ├── 3 Ninjas Kick Back.smc
-│   └── Super Mario World.smc
-├── RPG
-│   └── Chrono Trigger.smc
-├── Puzzle
-│   └── Tetris Attack.smc
-└── Others
-        └── SomeOtherGame.smc
+├── Nintendo
+│   ├── Super Mario World.smc
+│   └── The Legend of Zelda.smc
+├── Capcom
+│   └── Street Fighter II.smc
+└── Unknown Publisher
+          └── SomeOtherGame.smc
 ```
 
-## Additional Notes
+### By Alphabet:
+```
+D:\ROMS\
+├── A
+│   └── Aladdin.smc
+├── S
+│   ├── Super Mario World.smc
+│   └── Street Fighter II.smc
+└── T
+          └── The Legend of Zelda.smc
+```
+
+## Notes
 
 - **API Rate Limit**: IGDB has a limit of 4 requests per second. The script includes a delay to comply with this limit.
-- **Genre Mapping**: If you choose to apply custom genre mapping, genre names will be simplified (e.g., "Hack and slash/Beat 'em up" becomes "Action").
-- **Errors**: If a file is not found during the move process, the script will print a message but continue with the next file.
+- **Custom Genre Mapping**: You can modify the `genre_mapping` dictionary in the script to customize genre names.
+- **Empty Folder Cleanup**: The cleanup feature only deletes empty folders. Folders with files are left untouched.
 
 ## Support
 
-If you encounter any issues or have questions, feel free to open an issue in the repository or contact me directly.
+If you encounter any issues or have questions, feel free to open an issue or contact me directly.
 
-I hope this script helps you organize your ROM collection! 😊
-
+Enjoy organizing your ROM collection! 😊OM Organizer Script
