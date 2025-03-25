@@ -150,7 +150,7 @@ D:\ROMS\
 │   ├── Super Mario World.smc
 │   └── Street Fighter II.smc
 └── T
-          └── The Legend of Zelda.smc
+    └── The Legend of Zelda.smc
 ```
 
 ## Notes
