@@ -6,7 +6,7 @@ import requests
 from igdb.wrapper import IGDBWrapper
 import shutil
 from tqdm import tqdm
-from colorama import Fore, Style, init
+from colorama import Fore, init
 from genre_mapping import custom_genre_mapping
 
 # Initialize colorama
@@ -84,6 +84,8 @@ def generate_csv(use_custom):
     rom_files = []
     for root, _, files in os.walk(roms_path):
         for file in files:
+            if file.startswith("."):
+                continue
             if file.endswith(".smc") or file.endswith(".sfc"):
                 rom_files.append(os.path.join(root, file))
 
